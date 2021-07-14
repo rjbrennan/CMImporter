@@ -35,12 +35,18 @@ public class Importer {
 		
 		//Prompts user to enter the topic of the maps
 		String topic = JOptionPane.showInputDialog("Enter the topic");
-		while(map.inMap(topic)) {	
+		while(!map.inMap(topic)) {	
 			topic = JOptionPane.showInputDialog("That topic did not match any concepts, please try again");
 		}
+		String numDialog = "Enter number of clusters (min. 2)";
 		int numClu = 0;
 		while(numClu<2) {
-			numClu = Integer.parseInt(JOptionPane.showInputDialog("Enter number of clusters (min. 2)"));
+			try {
+				numClu = Integer.parseInt(JOptionPane.showInputDialog(numDialog));
+			}
+			catch(NumberFormatException e) {
+				numDialog = "Please enter a whole number";
+			}
 		}
 		
 		// FIXME if you write the name of another file, it just does filename..cxl

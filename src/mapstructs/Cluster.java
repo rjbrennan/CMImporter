@@ -82,9 +82,9 @@ public class Cluster extends Node {
 	
 	@Override
 	public String toString() {
-		String combined = this.getName() + "\t" + this.getCount();
+		String combined = "Topics:";
 		for(Concept cnc : concepts)
-			combined = combined.concat("\n"+"\t"+cnc.getName()+"\t"+cnc.getCount());
+			combined = combined.concat("&#xa;"+cnc.getName()+" ["+cnc.getCount()+"]");
 		
 		return combined;
 	}
@@ -94,7 +94,8 @@ public class Cluster extends Node {
 	 */
 	public String toCxl() {
 		return "<concept id=\""+this.getId()+"\" label=\""+this.getName()+
-			   "\" short-comment=\""+this.getCount()+"&#xa;e:"+this.getEdgeCount()+"\" />";
+			   "\" short-comment=\""+this.getCount()+"&#xa;e:"+this.getEdgeCount()+
+			   "&#xa;"+this.toString()+"\" />";
 	}
 	
 	/**
