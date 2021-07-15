@@ -9,6 +9,11 @@ import javax.swing.JOptionPane;
 import fileChooser.CustomFileChooser;
 import mapstructs.Map;
 
+/**
+ * Front end of program and calls to back end
+ * @author rjbrennan
+ *
+ */
 public class Importer {
 	
 	private static File input;
@@ -17,6 +22,7 @@ public class Importer {
 	public static void main(String[] args) throws IOException, InvocationTargetException, InterruptedException {
 		
 		//Prompts user to choose a folder of .cxl files they would like to combine
+		//EventQueue used to fix error where UI wouldn't appear
 		EventQueue.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
@@ -31,13 +37,15 @@ public class Importer {
 		});
 		
 		
+		//Creates Map object
 		Map map = new Map(input);
-		
-		//Prompts user to enter the topic of the maps
+				
+		//Prompts user to enter the topic of the maps, tests whether topic is in the map
 		String topic = JOptionPane.showInputDialog("Enter the topic");
 		while(!map.inMap(topic)) {	
 			topic = JOptionPane.showInputDialog("That topic did not match any concepts, please try again");
 		}
+		//Prompts user to enter number of clusters for collective map
 		String numDialog = "Enter number of clusters (min. 2)";
 		int numClu = 0;
 		while(numClu<2) {
@@ -50,6 +58,8 @@ public class Importer {
 		}
 		
 		// FIXME if you write the name of another file, it just does filename..cxl
+		//Prompts user to save output file
+		//EventQueue used to fix error where UI wouldn't show up
 		System.out.println("Got this far");
 		EventQueue.invokeAndWait(new Runnable() {
             @Override
@@ -61,6 +71,7 @@ public class Importer {
             }
         });
 
+		//Execute map clustering and file building
 		map.execute(output, numClu);
 
 	}

@@ -103,6 +103,7 @@ public class Map {
 	 * @return		True if the topic is in the list, false otherwise
 	 */
 	public boolean inMap(String topic) {
+		//TODO Make sure each file has topic
 		for(Concept cnc : concepts)
 			if(cnc.getName().equalsIgnoreCase(topic)) {
 				topicCnc = cnc;
