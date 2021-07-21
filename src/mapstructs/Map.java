@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 
 import annexFunctions.arrayFunctions;
 import annexFunctions.fileFunctions;
+import annexFunctions.stringFunctions;
 
 /**
  * 
@@ -71,6 +72,7 @@ public class Map {
 				cnnString = fileFunctions.cnnStrip(cxl);
 				
 				this.cncReader(cncString);
+				//FIXME reroute links
 				this.cnnReader(cnnString);
 			}
 		}
@@ -106,11 +108,16 @@ public class Map {
 		
 		this.clcBuilder();
 		
-		this.positionCalculator();
+		for(Cluster clu : clusters)
+			if(clu.getEdgeCount() <= 1)
+				clu.setExtra(true);
 		
+		int numClu = this.positionCalculator();
+		
+		//FIXME add back in extra clusters in a better way
 		String guts = this.mapCxl()+"\n"+
 					  this.cluCxl()+"\n"+this.clcCxl()+"\n"+
-					  this.cluCxlStyle()+"\n"+this.clcCxlStyle();
+					  this.cluCxlStyle(numClu)+"\n"+this.clcCxlStyle();
 		
 		File template = new File("Template.cxl");
 		
@@ -137,14 +144,23 @@ public class Map {
 	 * @param concepts	string of .cxl concepts, created by cncStrip()
 	 */
 	private void cncReader(String concepts) {
-		String id; String name;
+		String id; String name; String[] names;
 		
 		while(concepts.indexOf("<concept") >= 0) {
 			concepts = concepts.substring(concepts.indexOf("<concept")+8);
 			id = concepts.substring(concepts.indexOf("id=")+4, concepts.indexOf("\" "));
 			name = concepts.substring(concepts.indexOf("label=")+7, concepts.indexOf("\"/"));
-			if(!Concept.includes(this.concepts, name, id))
-				this.concepts.add(new Concept(name, id));
+			name = name.replaceAll("&#xa;", " ");
+			name = name.replaceAll("-", "");
+			name = name.replaceAll(".", "");
+			names = stringFunctions.splitCnc(name);
+			//FIXME explotation where you can boost a terms popularity by doing "term, term, term"
+			//FIXME ignore plurals
+			for(String n : names)
+			{
+				if(!Concept.includes(this.concepts, n, id))
+					this.concepts.add(new Concept(n, id));
+			}
 		}
 	}
 	
@@ -153,9 +169,10 @@ public class Map {
 	 * Must have already ran cncReader() or have a filled concepts object to work
 	 * @param connections	string of .cxl connections, created by cnnStrip()
 	 */
+	//FIXME Only allow one connection between two terms per map
 	private void cnnReader(String connections) {
 		String id; String from; String to;
-		Concept fromCnc; Concept toCnc;
+		Concept[] fromCnc; Concept[] toCnc;
 		
 		while(connections.indexOf("<connection") >= 0) {
 			connections = connections.substring(connections.indexOf("<connection")+11);
@@ -164,10 +181,12 @@ public class Map {
 										 connections.indexOf("\" t"));
 			to = connections.substring(connections.indexOf("to-id=")+7, 
 									   connections.indexOf("\"/"));
-			fromCnc = this.concepts.get(Concept.indexOf(this.concepts, from));
-			toCnc = this.concepts.get(Concept.indexOf(this.concepts, to));
-			if(!Connection.includes(this.connections, fromCnc, toCnc))
-				this.connections.add(new Connection(fromCnc, toCnc, id));
+			fromCnc = Concept.indexOf(this.concepts, from);
+			toCnc = Concept.indexOf(this.concepts, to);
+			for(Concept fcnc : fromCnc)
+				for(Concept tcnc : toCnc)
+					if(!Connection.includes(this.connections, fcnc, tcnc))
+						this.connections.add(new Connection(fcnc, tcnc, id));
 		}
 	}
 	
@@ -179,7 +198,11 @@ public class Map {
 	double[][] cncGrid() {
 		double[][] grid = new double[concepts.size()][concepts.size()];
 		for(int i = 0; i<grid.length; i++) {
+			if(concepts.get(i).equals(topicCnc))
+				continue;
 			for(int j = 0; j<grid[i].length; j++) {
+				if(concepts.get(j).equals(topicCnc))
+					continue;
 				for(Connection cnn : connections)
 					if((cnn.getFrom().equals(concepts.get(i)) && cnn.getTo().equals(concepts.get(j))) ||
 					   (cnn.getTo().equals(concepts.get(i)) && cnn.getFrom().equals(concepts.get(j)))) {
@@ -305,16 +328,22 @@ public class Map {
 	/**
 	 * Calculates the radius of the map for the .cxl file
 	 */
-	private void positionCalculator() {
+	private int positionCalculator() {
 		int longest = 0;
+		int numClu = 0;
 		for(Cluster clu : clusters)
-			if(clu.getName().length() > longest)
-				longest = clu.getName().length();
+			if(!clu.getExtra()) {
+				if(clu.getName().length() > longest)
+					longest = clu.getName().length();
+				numClu++;
+			}
 		
-		radius = ((Map.MARGIN*2 + Map.CHAR_WIDTH*longest)*clusters.size())/4;
+		radius = ((Map.MARGIN*2 + Map.CHAR_WIDTH*longest)*numClu)/4;
 		
 		if(radius<50)
 			radius = 50;
+		
+		return numClu;
 	}
 	
 	/**
@@ -330,17 +359,20 @@ public class Map {
 	private String cluCxl() {
 		String combine = "\t<concept-list>";
 		for(Cluster clu : clusters)
-			combine = combine.concat("\n\t    "+clu.toCxl());
+			if(!clu.getExtra())
+				combine = combine.concat("\n\t    "+clu.toCxl());
 		return combine.concat("\n\t</concept-list>");
 	}
 	
 	/**
 	 * Formats the .cxl concept appearance block
 	 */
-	private String cluCxlStyle() {
+	private String cluCxlStyle(int numClu) {
 		String combine = "\t<concept-appearance-list>";
+		int j = 0;
 		for(int i = 0; i<clusters.size(); i++)
-			combine = combine.concat("\n\t    "+clusters.get(i).toCxlStyle(radius,i,clusters.size()));
+			if(!clusters.get(i).getExtra())
+				combine = combine.concat("\n\t    "+clusters.get(i).toCxlStyle(radius,j++,numClu));
 		return combine.concat("\n\t</concept-appearance-list>");
 	}
 	
@@ -350,7 +382,8 @@ public class Map {
 	private String clcCxl() {
 		String combine = "\t<connection-list>";
 		for(ClusterConnection clc : clConnections)
-			combine = combine.concat("\n\t    "+clc.toCxl());
+			if(!clc.getFrom().getExtra() && !clc.getTo().getExtra())
+				combine = combine.concat("\n\t    "+clc.toCxl());
 		return combine.concat("\n\t</connection-list>");
 	}
 	
@@ -360,7 +393,8 @@ public class Map {
 	private String clcCxlStyle() {
 		String combine = "\t<connection-appearance-list>";
 		for(ClusterConnection clc : clConnections)
-			combine = combine.concat("\n\t    "+clc.toCxlStyle());
+			if(!clc.getFrom().getExtra() && !clc.getTo().getExtra())
+				combine = combine.concat("\n\t    "+clc.toCxlStyle());
 		return combine.concat("\n\t</connection-appearance-list>");
 	}
 
@@ -406,7 +440,7 @@ public class Map {
 	/**
 	 * @return formated string of clConnections
 	 */
-	public String printClConections() {
+	public String printClConnections() {
 		String combined = "";
 		for(ClusterConnection clc : clConnections)
 			combined = combined.concat(clc.getFrom().getName()+"\t"

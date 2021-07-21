@@ -26,7 +26,7 @@ public class MCL {
 		pGamma = 0;
 		while(pGamma<=0) {
 			JFrame frame = new JFrame();
-			JSlider slider = createSlider(10, 40);
+			JSlider slider = createSlider(10, 20);
 			JPanel sliderPanel = createSliderPanel(slider, "myMessage");
 			String title = "myTitle";
 			int dialogResponse = JOptionPane.showOptionDialog
@@ -62,12 +62,17 @@ public class MCL {
 		
 		cncGrid = arrayFunctions.transposeMatrix(cncGrid);
 		
+		System.out.println(arrayFunctions.print(cncGrid));
+		
 		Cluster temp = null;
 		for(int i = 0; i<cncGrid.length; i++)
 		{
 			temp = null;
 			for(int j = 0; j<cncGrid[i].length; j++)
-				if(cncGrid[i][j] > 0.1) {
+			{
+				if(map.concepts.get(j).getCluster() != null)
+					continue;
+				if(cncGrid[i][j] > 0.01) {
 					if(temp == null) {
 						temp = new Cluster(map.concepts.get(i));
 						map.clusters.add(temp);
@@ -77,6 +82,7 @@ public class MCL {
 					else if(i!=j)
 						temp.addConcept(map.concepts.get(j));		
 				}
+			}
 		}
 					
 		
@@ -90,7 +96,8 @@ public class MCL {
 	 */
 	private static JSlider createSlider(int min, int max) {
 		JSlider slider = new JSlider(min, max);
-		slider.setMajorTickSpacing(10);
+		slider.setMajorTickSpacing(5);
+		slider.setMinorTickSpacing(1);
 		slider.setPaintTicks(true);
 		slider.setPaintLabels(true);
 		slider.setValue(min);

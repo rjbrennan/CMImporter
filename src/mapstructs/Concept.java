@@ -1,5 +1,6 @@
 package mapstructs;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * 
@@ -28,14 +29,17 @@ public class Concept extends Node{
 	 * @param id	id to search for
 	 * @return	index of Concept, -1 if it isn't there
 	 */
-	public static int indexOf(ArrayList<Concept> cList, String id) {
+	public static Concept[] indexOf(ArrayList<Concept> cList, String id) {
+		Concept[] matches = new Concept[cList.size()];
+		int i = -1;
+		
 		for(Concept cnc : cList) {
 			for(String s : cnc.getIds())
 				if(s.equals(id))
-					return cList.indexOf(cnc);
+					matches[++i] = cnc;
 		}
 		
-		return -1;
+		return Arrays.copyOfRange(matches, 0, i+1);
 	}
 	
 	/**

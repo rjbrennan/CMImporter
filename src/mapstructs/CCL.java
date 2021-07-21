@@ -56,77 +56,79 @@ public class CCL {
 			//throw error
 		}
 		
-		for(Concept cnc : initClu)
+		for(Concept cnc : initClu) {
+			System.out.println("Init Cluster: "+cnc.getName());
 			map.clusters.add(new Cluster(cnc));
-		
-		//System.out.println(this.printmap.clusters());
-		
-		double[][] cncGrid = map.cncGrid();
-		
-		int[][] cluGrid = map.cluGrid(cncGrid);
-		
-		int clu1, clu2, diff, tieCount;
-		int[] winCnc = arrayFunctions.fill(new int[cluGrid.length], -1);
-		int[] winClu = arrayFunctions.fill(new int[cluGrid.length], -1);
-		while(true) {
-			diff = -1;
-			tieCount = 0;
-			
-			for(int i = 0; i<cluGrid.length; i++) {
-				if(map.concepts.get(i).getCluster() != null)
-					continue;
-				clu1 = clu2 = -1;
-				for(int j = 1; j<cluGrid[i].length; j++) {
-					if(clu1 < 0) {
-						clu2 = clu1;
-						clu1 = j;
-					}
-					else if(cluGrid[i][j] > cluGrid[i][clu1]) {
-						clu2 = clu1;
-						clu1 = j;
-					}
-					else if(clu2 < 0)
-						clu2 = j;
-					else if(cluGrid[i][j] > cluGrid[i][clu2])
-						clu2 = j;
-				}
-				if(cluGrid[i][clu1]-cluGrid[i][clu2] > diff) {
-					tieCount = 0;
-					diff = cluGrid[i][clu1]-cluGrid[i][clu2];
-					//System.out.println(diff);
-					winCnc = arrayFunctions.fill(winCnc, -1); winClu = arrayFunctions.fill(winClu, -1);
-					winCnc[tieCount] = i; winClu[tieCount] = clu1;
-				}
-				else if(cluGrid[i][clu1]-cluGrid[i][clu2] == diff) {
-					tieCount++;
-					winCnc[tieCount] = i; winClu[tieCount] = clu1;
-				}
-				
-				//System.out.println(arrayFunctions.print(winCnc));
-				//System.out.println(arrayFunctions.print(winClu));
-				
-			}
-			//System.out.println("---");
-			if(cluGrid[winCnc[0]][winClu[0]] == 0 || winCnc[0] == -1)
-				break;
-			
-			if(diff == 0) {
-				winCnc = arrayFunctions.fill(winCnc, -1); winClu = arrayFunctions.fill(winClu, -1);
-				winCnc[0] = map.mostConnected(cncGrid);
-				winClu[0] = arrayFunctions.max(cluGrid[winCnc[0]]);
-			}
-			
-			for(int i = 0; i<winCnc.length; i++){
-				if(winCnc[i] < 0) 
-					break;
-				map.clusters.get(winClu[i]).addConcept(map.concepts.get(winCnc[i]));
-				cluGrid = map.updateCluGrid(cluGrid, cncGrid, winCnc[i], winClu[i]);
-			}
 		}
 		
+		//System.out.println(this.printmap.clusters());
 		while(map.cncLeft()) {
+			double[][] cncGrid = map.cncGrid();
+			
+			int[][] cluGrid = map.cluGrid(cncGrid);
+			
+			int clu1, clu2, diff, tieCount;
+			int[] winCnc = arrayFunctions.fill(new int[cluGrid.length], -1);
+			int[] winClu = arrayFunctions.fill(new int[cluGrid.length], -1);
+		
+			while(true) {
+				diff = -1;
+				tieCount = 0;
+				
+				for(int i = 0; i<cluGrid.length; i++) {
+					if(map.concepts.get(i).getCluster() != null)
+						continue;
+					clu1 = clu2 = -1;
+					for(int j = 1; j<cluGrid[i].length; j++) {
+						if(clu1 < 0) {
+							clu2 = clu1;
+							clu1 = j;
+						}
+						else if(cluGrid[i][j] > cluGrid[i][clu1]) {
+							clu2 = clu1;
+							clu1 = j;
+						}
+						else if(clu2 < 0)
+							clu2 = j;
+						else if(cluGrid[i][j] > cluGrid[i][clu2])
+							clu2 = j;
+					}
+					if(cluGrid[i][clu1]-cluGrid[i][clu2] > diff) {
+						tieCount = 0;
+						diff = cluGrid[i][clu1]-cluGrid[i][clu2];
+						//System.out.println(diff);
+						winCnc = arrayFunctions.fill(winCnc, -1); winClu = arrayFunctions.fill(winClu, -1);
+						winCnc[tieCount] = i; winClu[tieCount] = clu1;
+					}
+					else if(cluGrid[i][clu1]-cluGrid[i][clu2] == diff) {
+						tieCount++;
+						winCnc[tieCount] = i; winClu[tieCount] = clu1;
+					}
+					
+				}
+				//System.out.println("---");
+				if(cluGrid[winCnc[0]][winClu[0]] == 0 || winCnc[0] == -1)
+					break;
+				
+				if(diff == 0) {
+					winCnc = arrayFunctions.fill(winCnc, -1); winClu = arrayFunctions.fill(winClu, -1);
+					winCnc[0] = map.mostConnected(cncGrid);
+					winClu[0] = arrayFunctions.max(cluGrid[winCnc[0]]);
+				}
+				
+				for(int i = 0; i<winCnc.length; i++){
+					if(winCnc[i] < 0) 
+						break;
+					map.clusters.get(winClu[i]).addConcept(map.concepts.get(winCnc[i]));
+					cluGrid = map.updateCluGrid(cluGrid, cncGrid, winCnc[i], winClu[i]);
+				}
+			}
+			
+			
 			Concept cnc = map.mostPopular();
+			System.out.println("Extra Cluster: "+cnc.getName());
 			Cluster clu = new Cluster(cnc);
+			clu.setExtra(true);
 			map.clusters.add(clu);
 			for(Connection cnn : map.connections) {
 				if(cnn.getFrom().equals(cnc) 
@@ -136,6 +138,7 @@ public class CCL {
 						&& cnn.getFrom().getCluster() == null)
 					clu.addConcept(cnn.getFrom());
 			}
+			
 		}
 		
 	}

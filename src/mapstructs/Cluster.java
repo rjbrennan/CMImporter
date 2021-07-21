@@ -15,6 +15,7 @@ public class Cluster extends Node {
 	private ArrayList<Concept> concepts;
 	private ArrayList<Connection> internalConnections;
 	private int edgeCount;
+	private boolean extra = false;
 
 	/**
 	 * Create new cluster object
@@ -60,6 +61,14 @@ public class Cluster extends Node {
 		return edgeCount;
 	}
 	
+	public void setExtra(boolean b) {
+		this.extra = b;
+	}
+	
+	public boolean getExtra() {
+		return extra;
+	}
+	
 	/**
 	 * Adds a Concept object to the Cluster and updates the Concept object's cluster parameter.
 	 * Also updates this Cluster's count
@@ -82,6 +91,14 @@ public class Cluster extends Node {
 	
 	@Override
 	public String toString() {
+		String combined = name+"\t"+count;
+		for(Concept cnc : concepts)
+			combined = combined.concat("\n\t"+cnc.getName()+"\t"+cnc.getCount());
+		
+		return combined;
+	}
+	
+	public String toStringCxl() {
 		String combined = "Topics:";
 		for(Concept cnc : concepts)
 			combined = combined.concat("&#xa;"+cnc.getName()+" ["+cnc.getCount()+"]");
@@ -95,7 +112,7 @@ public class Cluster extends Node {
 	public String toCxl() {
 		return "<concept id=\""+this.getId()+"\" label=\""+this.getName()+
 			   "\" short-comment=\""+this.getCount()+"&#xa;e:"+this.getEdgeCount()+
-			   "&#xa;"+this.toString()+"\" />";
+			   "&#xa;"+this.toStringCxl()+"\" />";
 	}
 	
 	/**

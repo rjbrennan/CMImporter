@@ -41,6 +41,17 @@ public class arrayFunctions {
 		return combine+"}";
 	}
 	
+	public static String print(double[][] matrix) {
+		String combine = "";
+		for(double[] row : matrix) {
+			for(double j : row)
+				combine = combine.concat(String.format("%1.2f,", j));
+			combine = combine.concat("\n");
+		}
+		
+		return combine;
+	}
+	
 	/**
 	 * @param cncGrid	int array to sum
 	 * @return	The sum of the int array
