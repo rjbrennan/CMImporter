@@ -44,6 +44,8 @@ public class fileFunctions {
 	public static String cnnStrip(String cxl) {
 		
 		int cnnStart = cxl.indexOf("<connection-list>");
+		if(cnnStart==-1)
+			return "";
 		int cnnEnd = cxl.indexOf("</connection-list>");
 		
 		String connections = cxl.substring(cnnStart+19, cnnEnd);

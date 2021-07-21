@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 import annexFunctions.arrayFunctions;
 import annexFunctions.fileFunctions;
 
@@ -21,12 +23,12 @@ public class Map {
 	
 	private int radius = 0;
 	
-	private ArrayList<Cluster> clusters;
-	private ArrayList<ClusterConnection> clConnections;
-	private ArrayList<Concept> concepts;
-	private ArrayList<Connection> connections;
+	ArrayList<Cluster> clusters;
+	ArrayList<ClusterConnection> clConnections;
+	ArrayList<Concept> concepts;
+	ArrayList<Connection> connections;
 	
-	private Concept topicCnc;
+	Concept topicCnc;
 	
 	/**
 	 * 	Constructs a Map object given you already have all the elements built. 
@@ -80,9 +82,27 @@ public class Map {
 	 * @param pGamma	Inflation value for Markov Clustering
 	 * @throws IOException
 	 */
-	public void execute(File output, int numClu) throws IOException {
+	public void execute(File output) throws IOException {
 		
-		this.cluBuilder(numClu);
+		String[] choices = {"Markov Clustering", "Closest Cluster"};
+		String algorithm = (String) JOptionPane.showInputDialog(null, "Choose an algorithm", 
+													   "Line 2?", JOptionPane.QUESTION_MESSAGE, null,
+													   choices, choices[0]);
+		
+		//Prompts user to enter the topic of the maps, tests whether topic is in the map
+		String topic = JOptionPane.showInputDialog("Enter the topic");
+		while(!inMap(topic)) {	
+			topic = JOptionPane.showInputDialog("That topic did not match any concepts, please try again");
+		}
+		
+		if(algorithm.equals("Markov Clustering")) {
+			MCL mcl = new MCL(this);
+			mcl.execute();
+		}
+		else if(algorithm.equals("Closest Cluster")) {
+			CCL ccl = new CCL(this);
+			ccl.execute();
+		}
 		
 		this.clcBuilder();
 		
@@ -150,131 +170,14 @@ public class Map {
 				this.connections.add(new Connection(fromCnc, toCnc, id));
 		}
 	}
-
-	/**
-	 * Clusters concepts based on popularity algorithm
-	 * Asks user for concept map topic and starting number of nodes
-	 */
-	private void cluBuilder(int numClu) {
-		
-		Concept[] initClu = new Concept[numClu];
-		boolean gotTopic = false;
-		
-		for(Concept cnc : concepts) {
-			if(cnc.equals(topicCnc)) {
-				clusters.add(new Cluster(cnc));
-				gotTopic = true;
-				continue;
-			}
-			for(int i = 0; i < numClu; i++) {
-				if(initClu[i] == null)
-				{
-					initClu[i] = cnc;
-					break;
-				}
-				else if(cnc.getCount() > initClu[i].getCount())
-				{
-					initClu = arrayFunctions.move(initClu, cnc, i);
-					break;
-				}
-			}
-				
-		}
-		
-		if(!gotTopic) {
-			//throw error
-		}
-		
-		for(Concept cnc : initClu)
-			clusters.add(new Cluster(cnc));
-		
-		//System.out.println(this.printClusters());
-		
-		int[][] cncGrid = this.cncGrid();
-		
-		int[][] cluGrid = this.cluGrid(cncGrid);
-		
-		int clu1, clu2, diff, tieCount;
-		int[] winCnc = arrayFunctions.fill(new int[cluGrid.length], -1);
-		int[] winClu = arrayFunctions.fill(new int[cluGrid.length], -1);
-		while(true) {
-			diff = -1;
-			tieCount = 0;
-			
-			for(int i = 0; i<cluGrid.length; i++) {
-				if(concepts.get(i).getCluster() != null)
-					continue;
-				clu1 = clu2 = -1;
-				for(int j = 1; j<cluGrid[i].length; j++) {
-					if(clu1 < 0) {
-						clu2 = clu1;
-						clu1 = j;
-					}
-					else if(cluGrid[i][j] > cluGrid[i][clu1]) {
-						clu2 = clu1;
-						clu1 = j;
-					}
-					else if(clu2 < 0)
-						clu2 = j;
-					else if(cluGrid[i][j] > cluGrid[i][clu2])
-						clu2 = j;
-				}
-				if(cluGrid[i][clu1]-cluGrid[i][clu2] > diff) {
-					tieCount = 0;
-					diff = cluGrid[i][clu1]-cluGrid[i][clu2];
-					//System.out.println(diff);
-					winCnc = arrayFunctions.fill(winCnc, -1); winClu = arrayFunctions.fill(winClu, -1);
-					winCnc[tieCount] = i; winClu[tieCount] = clu1;
-				}
-				else if(cluGrid[i][clu1]-cluGrid[i][clu2] == diff) {
-					tieCount++;
-					winCnc[tieCount] = i; winClu[tieCount] = clu1;
-				}
-				
-				//System.out.println(arrayFunctions.print(winCnc));
-				//System.out.println(arrayFunctions.print(winClu));
-				
-			}
-			//System.out.println("---");
-			if(cluGrid[winCnc[0]][winClu[0]] == 0 || winCnc[0] == -1)
-				break;
-			
-			if(diff == 0) {
-				winCnc = arrayFunctions.fill(winCnc, -1); winClu = arrayFunctions.fill(winClu, -1);
-				winCnc[0] = mostConnected(cncGrid);
-				winClu[0] = arrayFunctions.max(cluGrid[winCnc[0]]);
-			}
-			
-			for(int i = 0; i<winCnc.length; i++){
-				if(winCnc[i] < 0) 
-					break;
-				clusters.get(winClu[i]).addConcept(concepts.get(winCnc[i]));
-				cluGrid = updateCluGrid(cluGrid, cncGrid, winCnc[i], winClu[i]);
-			}
-		}
-		
-		while(cncLeft()) {
-			Concept cnc = mostPopular();
-			Cluster clu = new Cluster(cnc);
-			clusters.add(clu);
-			for(Connection cnn : connections) {
-				if(cnn.getFrom().equals(cnc) 
-						&& cnn.getTo().getCluster() == null)
-					clu.addConcept(cnn.getTo());
-				else if(cnn.getTo().equals(cnc) 
-						&& cnn.getFrom().getCluster() == null)
-					clu.addConcept(cnn.getFrom());
-			}
-		}
-	}
 	
 	/**
 	 * Makes a grid of integers, each box records the count of connections 
 	 * between the x and y elements
 	 * @return	2-dimensional integer array
 	 */
-	private int[][] cncGrid() {
-		int[][] grid = new int[concepts.size()][concepts.size()];
+	double[][] cncGrid() {
+		double[][] grid = new double[concepts.size()][concepts.size()];
 		for(int i = 0; i<grid.length; i++) {
 			for(int j = 0; j<grid[i].length; j++) {
 				for(Connection cnn : connections)
@@ -295,7 +198,7 @@ public class Map {
 	 * @param cncGrid	2-dim int array made by cncGrid()
 	 * @return	2-dimensional integer array
 	 */
-	private int[][] cluGrid(int[][] cncGrid) {
+	int[][] cluGrid(double[][] cncGrid) {
 		int[][] grid = new int[concepts.size()][clusters.size()];
 		Cluster clu;
 		
@@ -320,7 +223,7 @@ public class Map {
 	 * @param clu		Index of cluster to update the grid for
 	 * @return			The transformed 2-dim int array, cluGrid
 	 */
-	private int[][] updateCluGrid(int[][] cluGrid, int[][] cncGrid, int cnc, int clu) {
+	int[][] updateCluGrid(int[][] cluGrid, double[][] cncGrid, int cnc, int clu) {
 		
 		for(int j = 0; j<cncGrid[cnc].length; j++) {
 			cluGrid[j][clu] += cncGrid[cnc][j];
@@ -334,7 +237,7 @@ public class Map {
 	 * @param cncGrid	2-dim int array made by cncGrid()
 	 * @return			Index of the most connected concept
 	 */
-	private int mostConnected(int[][] cncGrid) {
+	int mostConnected(double[][] cncGrid) {
 		int mostCon = 0; int mostCount = 0; int tempCount;
 		for(int i = 0; i<cncGrid.length; i++) {
 			if(concepts.get(i).getCluster() != null)
@@ -371,7 +274,7 @@ public class Map {
 	 * @return	Returns true if there is a concept that still needs
 	 * to be assigned to a cluster, false otherwise
 	 */
-	private boolean cncLeft() {
+	boolean cncLeft() {
 		for(Concept cnc : concepts)
 			if(cnc.getCluster() == null)
 				return true;

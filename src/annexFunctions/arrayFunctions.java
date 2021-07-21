@@ -42,15 +42,27 @@ public class arrayFunctions {
 	}
 	
 	/**
-	 * @param array	int array to sum
+	 * @param cncGrid	int array to sum
 	 * @return	The sum of the int array
 	 */
-	public static int sum(int[] array) {
+	public static int sum(double[] cncGrid) {
 		int sum = 0;
-		for(int i : array)
+		for(double i : cncGrid)
 			sum += i;
 		return sum;
 	}
+	
+	/**
+	 * @param m	Matrix
+	 * @return	Transposed matrix
+	 */
+	public static double[][] transposeMatrix(double [][] m) {
+        double[][] temp = new double[m[0].length][m.length];
+        for (int i = 0; i < m.length; i++)
+            for (int j = 0; j < m[0].length; j++)
+                temp[j][i] = m[i][j];
+        return temp;
+    }
 	
 	/**
 	 * Adds an element to an array by moving everything to the right 
