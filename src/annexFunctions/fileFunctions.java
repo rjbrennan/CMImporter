@@ -53,4 +53,14 @@ public class fileFunctions {
 		return connections.trim();
 	}
 
+	public static String linkStrip(String cxl) {
+		int linkStart = cxl.indexOf("<linking-phrase-list>");
+		if(linkStart==-1)
+			return "";
+		int linkEnd = cxl.indexOf("</linking-phrase-list>");
+		
+		String links = cxl.substring(linkStart+23,linkEnd);
+		return links.trim();
+	}
+
 }

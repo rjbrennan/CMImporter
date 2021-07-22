@@ -26,5 +26,33 @@ public class stringFunctions {
 				numTerms++;
 		return numTerms;
 	}
+	
+	public static int numLines(int width, String term) {
+		int numLines = 1;
+		int curLine = 0;
+		int wordLength = 0;
+		String seperators = "!%)-}]:;\",.? ";
+		
+		for(char x : term.toCharArray()) {
+			if(seperators.indexOf(x)>=0) {
+				curLine += wordLength+1;
+				wordLength = 0;
+				if(curLine>width) {
+					numLines++;
+					curLine = 0;
+				}
+			}
+			else {
+				wordLength++;
+				if(curLine+wordLength>width) {
+					numLines++;
+					curLine = 0;
+				}
+			}
+				
+		}
+		
+		return numLines;
+	}
 
 }

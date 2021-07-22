@@ -35,6 +35,7 @@ public class Connection {
 	 * @return
 	 */
 	public static boolean includes(ArrayList<Connection> cList, Concept from, Concept to) {
+		
 		for(Connection cnn : cList) {
 			if(cnn.getFrom().equals(from) && cnn.getTo().equals(to) ||
 			   cnn.getFrom().equals(to) && cnn.getTo().equals(from)) {
@@ -58,6 +59,10 @@ public class Connection {
 	 */
 	public Concept getTo() {
 		return to;
+	}
+	
+	public void setTo(Concept to) {
+		this.to = to;
 	}
 
 	/**

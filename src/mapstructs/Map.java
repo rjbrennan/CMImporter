@@ -20,16 +20,21 @@ import annexFunctions.stringFunctions;
 public class Map {
 	
 	final static int MARGIN = 7;
-	final static int CHAR_WIDTH = 6;
+	final static int CHAR_WIDTH = 7;
+	final static int HEIGHT = 15;
 	
-	private int radius = 0;
+	int radius = 0;
+	int longestPix = 0;
+	int longestWidth = 0;
 	
 	ArrayList<Cluster> clusters;
 	ArrayList<ClusterConnection> clConnections;
 	ArrayList<Concept> concepts;
 	ArrayList<Connection> connections;
-	
+	ArrayList<Concept> links;
+
 	Concept topicCnc;
+	
 	
 	/**
 	 * 	Constructs a Map object given you already have all the elements built. 
@@ -57,8 +62,10 @@ public class Map {
 		this.connections = new ArrayList<Connection>();
 		this.clusters = new ArrayList<Cluster>();
 		this.clConnections = new ArrayList<ClusterConnection>();
+		this.links = new ArrayList<Concept>();
 		
-		Path fileName; String cxl; String cncString; String cnnString;
+		Path fileName; String cxl; 
+		String cncString; String linkString; String cnnString;
 		
 		String[] contents = directoryPath.list();
 		
@@ -69,13 +76,16 @@ public class Map {
 				cxl = Files.readString(fileName);
 				
 				cncString = fileFunctions.cncStrip(cxl);
+				linkString = fileFunctions.linkStrip(cxl);
 				cnnString = fileFunctions.cnnStrip(cxl);
 				
 				this.cncReader(cncString);
+				this.linkReader(linkString);
 				//FIXME reroute links
 				this.cnnReader(cnnString);
 			}
 		}
+		System.out.println(concepts);
 	}
 		
 	/**
@@ -130,7 +140,6 @@ public class Map {
 	 * @return		True if the topic is in the list, false otherwise
 	 */
 	public boolean inMap(String topic) {
-		//TODO Make sure each file has topic
 		for(Concept cnc : concepts)
 			if(cnc.getName().equalsIgnoreCase(topic)) {
 				topicCnc = cnc;
@@ -152,7 +161,7 @@ public class Map {
 			name = concepts.substring(concepts.indexOf("label=")+7, concepts.indexOf("\"/"));
 			name = name.replaceAll("&#xa;", " ");
 			name = name.replaceAll("-", "");
-			name = name.replaceAll(".", "");
+			name = name.replaceAll("//.", "");
 			names = stringFunctions.splitCnc(name);
 			//FIXME explotation where you can boost a terms popularity by doing "term, term, term"
 			//FIXME ignore plurals
@@ -182,11 +191,46 @@ public class Map {
 			to = connections.substring(connections.indexOf("to-id=")+7, 
 									   connections.indexOf("\"/"));
 			fromCnc = Concept.indexOf(this.concepts, from);
+			if(fromCnc == null) {
+				fromCnc = new Concept[1];
+				fromCnc[0] = Link.get(this.links, from);
+			}
 			toCnc = Concept.indexOf(this.concepts, to);
+			if(toCnc == null) {
+				toCnc = new Concept[1];
+				toCnc[0] = Link.get(this.links, to);
+			}
+			System.out.println(fromCnc[0]+", "+toCnc[0]);
 			for(Concept fcnc : fromCnc)
 				for(Concept tcnc : toCnc)
 					if(!Connection.includes(this.connections, fcnc, tcnc))
 						this.connections.add(new Connection(fcnc, tcnc, id));
+		}
+		
+		Connection tempCnn;
+		for(int i = this.connections.size()-1; i>=0; i--) {
+			tempCnn = this.connections.get(i);
+			if(links.contains(tempCnn.getFrom())) {
+				tempCnn.getTo().addIds(tempCnn.getFrom().getId());
+				this.connections.remove(i);
+			}
+		}
+		
+		for(Connection cnn : this.connections) {
+			if(links.contains(cnn.getTo()))
+				cnn.setTo(Concept.indexOf(this.concepts, cnn.getTo().getId())[0]);
+		}
+		
+	}
+	
+	private void linkReader(String links) {
+		String name; String id; 
+		
+		while(links.indexOf("<linking-phrase") >= 0) {
+			links = links.substring(links.indexOf("<linking-phrase")+15);
+			id = links.substring(links.indexOf("id=")+4, links.indexOf("\" label"));
+			name = links.substring(links.indexOf("label=")+7, links.indexOf("\"/"));
+			this.links.add(new Concept(name, id));
 		}
 	}
 	
@@ -325,6 +369,14 @@ public class Map {
 		}
 	}
 	
+	private Cluster lastExtra(int i) {
+		int j = i;
+		while(--j>=0)
+			if(clusters.get(j).getExtra())
+				return clusters.get(j);
+		return clusters.get(i);
+	}
+	
 	/**
 	 * Calculates the radius of the map for the .cxl file
 	 */
@@ -338,7 +390,12 @@ public class Map {
 				numClu++;
 			}
 		
-		radius = ((Map.MARGIN*2 + Map.CHAR_WIDTH*longest)*numClu)/4;
+		longestPix = Map.MARGIN*2 + Map.CHAR_WIDTH*longest;
+		longestWidth = longest;
+		
+		System.out.println(longestPix + ", "+longestWidth);
+		
+		radius = ((longestPix)*numClu)/4;
 		
 		if(radius<50)
 			radius = 50;
@@ -350,7 +407,7 @@ public class Map {
 	 * Formats the .cxl map line
 	 */
 	private String mapCxl() {
-		return "    <map width=\""+radius*3+"\" height=\""+radius*2.5+"\">";
+		return "    <map width=\""+radius*4+"\" height=\""+radius*3+"\">";
 	}
 	
 	/**
@@ -359,8 +416,7 @@ public class Map {
 	private String cluCxl() {
 		String combine = "\t<concept-list>";
 		for(Cluster clu : clusters)
-			if(!clu.getExtra())
-				combine = combine.concat("\n\t    "+clu.toCxl());
+			combine = combine.concat("\n\t    "+clu.toCxl());
 		return combine.concat("\n\t</concept-list>");
 	}
 	
@@ -370,9 +426,17 @@ public class Map {
 	private String cluCxlStyle(int numClu) {
 		String combine = "\t<concept-appearance-list>";
 		int j = 0;
-		for(int i = 0; i<clusters.size(); i++)
-			if(!clusters.get(i).getExtra())
+		int yLast = 0;
+		int hLast = 0;
+		for(int i = 0; i<clusters.size(); i++) {
+			if(clusters.get(i).getExtra()) {
+				yLast = lastExtra(i).y;
+				hLast = stringFunctions.numLines(longestWidth, lastExtra(i).getName());
+				combine = combine.concat("\n\t    "+ clusters.get(i).toCxlStyleExtra(this, yLast, hLast));
+			}
+			else
 				combine = combine.concat("\n\t    "+clusters.get(i).toCxlStyle(radius,j++,numClu));
+		}
 		return combine.concat("\n\t</concept-appearance-list>");
 	}
 	

@@ -2,6 +2,8 @@ package mapstructs;
 
 import java.util.ArrayList;
 
+import annexFunctions.stringFunctions;
+
 /**
  * 
  * @author Riordan Brennan
@@ -16,6 +18,7 @@ public class Cluster extends Node {
 	private ArrayList<Connection> internalConnections;
 	private int edgeCount;
 	private boolean extra = false;
+	int y = 0;
 
 	/**
 	 * Create new cluster object
@@ -128,6 +131,25 @@ public class Cluster extends Node {
 				"\" x=\""+x+"\" y=\""+y+"\" width=\"33\" height=\"24\""+
 				" background-color=\"255,200,0,255\" border-color=\"0,0,0,255\""+
 				" border-shape=\"oval\" shadow-color=\"none\"/>";
+	}
+	
+	public String toCxlStyleExtra(Map map, int yLast, int hLast) {
+		int x = (int) (map.radius*2.5 + map.longestPix*1.5);
+		this.y = (int) (yLast+
+					   	(0.5*hLast*Map.HEIGHT)+
+					   	Map.HEIGHT+
+					   	(0.5*stringFunctions.numLines(map.longestWidth, this.name)*Map.HEIGHT));
+		
+		int y = (int) (this.y+(map.radius*0.25));
+		
+		
+		return "<concept-appearance id=\""+this.getId()+
+				"\" x=\""+x+"\" y=\""+y+"\" width=\""+map.longestPix+
+				"\" background-color=\"255,200,0,255\" border-color=\"0,0,0,255\""+
+				" border-shape=\"rectangle\" shadow-color=\"none\" min-width=\""+map.longestPix+
+				"\" min-height=\""+Map.HEIGHT+"\" max-width=\""+map.longestPix+"\"/>";
+		
+				
 	}
 
 }

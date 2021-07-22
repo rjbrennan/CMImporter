@@ -38,6 +38,8 @@ public class Concept extends Node{
 				if(s.equals(id))
 					matches[++i] = cnc;
 		}
+		if(i == -1)
+			return null;
 		
 		return Arrays.copyOfRange(matches, 0, i+1);
 	}
@@ -106,7 +108,7 @@ public class Concept extends Node{
 
 	@Override
 	public String toString() {
-		return "Concept [name=" + name + ", id=" + id + ", cluster=" + cluster.getName() + ", count=" + count + "]";
+		return "Concept [name=" + name + ", id=" + id + ", count=" + count + "]";
 	}
 
 }

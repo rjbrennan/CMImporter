@@ -62,7 +62,7 @@ public class MCL {
 		
 		cncGrid = arrayFunctions.transposeMatrix(cncGrid);
 		
-		System.out.println(arrayFunctions.print(cncGrid));
+		//System.out.println(arrayFunctions.print(cncGrid));
 		
 		Cluster temp = null;
 		for(int i = 0; i<cncGrid.length; i++)

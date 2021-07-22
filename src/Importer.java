@@ -55,11 +55,6 @@ public class Importer {
 
 		//Execute map clustering and file building
 		map.execute(output);
-		
-		System.out.println(map.printConcepts());
-		System.out.println(map.printConnections());
-		System.out.println(map.printClusters());
-		System.out.println(map.printClConnections());
 
 	}
 
