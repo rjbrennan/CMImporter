@@ -38,11 +38,17 @@
             <concept id="1X15YS5YB-R8C5DV-KF" label="1"/>
             <concept id="1X15YSDDL-12HT6LC-KR" label="2"/>
         </concept-list>
+        <linking-phrase-list>
+            <linking-phrase id="1X46VCF86-248GMJS-K4" label="bbbb"/>
+            <linking-phrase id="1X46VC3B5-L08VRY-J7" label="aaa"/>
+        </linking-phrase-list>
         <connection-list>
-            <connection id="1X15YT6D5-1FH02G6-LT" from-id="1X15YSDDL-12HT6LC-KR" to-id="1X15YT08R-L372PT-LF"/>
-            <connection id="1X15YTBBK-1XFYZY6-M6" from-id="1X15YT08R-L372PT-LF" to-id="1X15YS5YB-R8C5DV-KF"/>
-            <connection id="1X15YSQY0-YN8QFM-L3" from-id="1X15YSDDL-12HT6LC-KR" to-id="1X15YS5YB-R8C5DV-KF"/>
+            <connection id="1X46VCF8D-28C32M6-KD" from-id="1X46VCF86-248GMJS-K4" to-id="1X15YS5YB-R8C5DV-KF"/>
             <connection id="1X15YTM27-1Y83QKF-MT" from-id="1X15YT08R-L372PT-LF" to-id="1X15YTFBS-1749LVS-MH"/>
+            <connection id="1X15YSQY0-YN8QFM-L3" from-id="1X15YSDDL-12HT6LC-KR" to-id="1X15YS5YB-R8C5DV-KF"/>
+            <connection id="1X46VC3BB-2DG4S6V-JC" from-id="1X15YT08R-L372PT-LF" to-id="1X46VC3B5-L08VRY-J7"/>
+            <connection id="1X46VCF8C-1ZDJTCG-K7" from-id="1X15YT08R-L372PT-LF" to-id="1X46VCF86-248GMJS-K4"/>
+            <connection id="1X46VC3BD-KFDYY1-JJ" from-id="1X46VC3B5-L08VRY-J7" to-id="1X15YSDDL-12HT6LC-KR"/>
         </connection-list>
         <concept-appearance-list>
             <concept-appearance id="1X15YTFBS-1749LVS-MH" x="277" y="355" width="24" height="25"/>
@@ -50,11 +56,17 @@
             <concept-appearance id="1X15YS5YB-R8C5DV-KF" x="246" y="236" width="24" height="25"/>
             <concept-appearance id="1X15YSDDL-12HT6LC-KR" x="108" y="270" width="24" height="25"/>
         </concept-appearance-list>
+        <linking-phrase-appearance-list>
+            <linking-phrase-appearance id="1X46VCF86-248GMJS-K4" x="207" y="280" width="32" height="11"/>
+            <linking-phrase-appearance id="1X46VC3B5-L08VRY-J7" x="138" y="297" width="24" height="9"/>
+        </linking-phrase-appearance-list>
         <connection-appearance-list>
-            <connection-appearance id="1X15YT6D5-1FH02G6-LT" from-pos="center" to-pos="center"/>
-            <connection-appearance id="1X15YTBBK-1XFYZY6-M6" from-pos="center" to-pos="center"/>
-            <connection-appearance id="1X15YSQY0-YN8QFM-L3" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1X46VCF8D-28C32M6-KD" from-pos="center" to-pos="center"/>
             <connection-appearance id="1X15YTM27-1Y83QKF-MT" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1X15YSQY0-YN8QFM-L3" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1X46VC3BB-2DG4S6V-JC" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1X46VCF8C-1ZDJTCG-K7" from-pos="center" to-pos="center"/>
+            <connection-appearance id="1X46VC3BD-KFDYY1-JJ" from-pos="center" to-pos="center"/>
         </connection-appearance-list>
         <style-sheet-list>
             <style-sheet id="_Default_">

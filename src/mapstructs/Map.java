@@ -81,7 +81,6 @@ public class Map {
 				
 				this.cncReader(cncString);
 				this.linkReader(linkString);
-				//FIXME reroute links
 				this.cnnReader(cnnString);
 			}
 		}
@@ -94,7 +93,7 @@ public class Map {
 	 * @param pGamma	Inflation value for Markov Clustering
 	 * @throws IOException
 	 */
-	public void execute(File output) throws IOException {
+	public void buildClusters() {
 		
 		String[] choices = {"Markov Clustering", "Closest Cluster"};
 		String algorithm = (String) JOptionPane.showInputDialog(null, "Choose an algorithm", 
@@ -115,16 +114,20 @@ public class Map {
 			CCL ccl = new CCL(this);
 			ccl.execute();
 		}
-		
+	}
+	
+	public void buildClConnections() {
 		this.clcBuilder();
 		
 		for(Cluster clu : clusters)
 			if(clu.getEdgeCount() <= 1)
 				clu.setExtra(true);
+	}
+	
+	public void export(File output) throws IOException {
 		
 		int numClu = this.positionCalculator();
 		
-		//FIXME add back in extra clusters in a better way
 		String guts = this.mapCxl()+"\n"+
 					  this.cluCxl()+"\n"+this.clcCxl()+"\n"+
 					  this.cluCxlStyle(numClu)+"\n"+this.clcCxlStyle();
@@ -163,8 +166,8 @@ public class Map {
 			name = name.replaceAll("-", "");
 			name = name.replaceAll("//.", "");
 			names = stringFunctions.splitCnc(name);
-			//FIXME explotation where you can boost a terms popularity by doing "term, term, term"
 			//FIXME ignore plurals
+			//FIXME spelling mistakes
 			for(String n : names)
 			{
 				if(!Concept.includes(this.concepts, n, id))
@@ -193,12 +196,12 @@ public class Map {
 			fromCnc = Concept.indexOf(this.concepts, from);
 			if(fromCnc == null) {
 				fromCnc = new Concept[1];
-				fromCnc[0] = Link.get(this.links, from);
+				fromCnc[0] = Concept.getLink(this.links, from);
 			}
 			toCnc = Concept.indexOf(this.concepts, to);
 			if(toCnc == null) {
 				toCnc = new Concept[1];
-				toCnc[0] = Link.get(this.links, to);
+				toCnc[0] = Concept.getLink(this.links, to);
 			}
 			System.out.println(fromCnc[0]+", "+toCnc[0]);
 			for(Concept fcnc : fromCnc)
@@ -274,7 +277,7 @@ public class Map {
 				continue;
 			for(int j = 0; j<cncGrid[i].length; j++) {
 				clu = concepts.get(j).getCluster();
-				if(clu != null && !(clu.equals(topicCnc)))
+				if(clu != null)
 					grid[i][clusters.indexOf(clu)] += cncGrid[i][j];
 			}
 		}
@@ -467,6 +470,25 @@ public class Map {
 	 */
 	public ArrayList<Cluster> getClusters() {
 		return clusters;
+	}
+	
+	public String[] getClusterNames(boolean includeExtras) {
+		String[] names;
+		ArrayList<Cluster> newList = new ArrayList<Cluster>();
+		
+		if(includeExtras)
+			newList = clusters;
+		else
+			for(Cluster clu : clusters)
+				if(!clu.getExtra())
+					newList.add(clu);
+		
+		names = new String[newList.size()];
+		
+		for(int i = 0; i<newList.size(); i++)
+			names[i] = newList.get(i).getName();
+	
+		return names;
 	}
 
 	/**

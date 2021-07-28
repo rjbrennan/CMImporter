@@ -44,6 +44,13 @@ public class Concept extends Node{
 		return Arrays.copyOfRange(matches, 0, i+1);
 	}
 	
+	public static Concept get(ArrayList<Concept> cncList, String name) {
+		for(Concept cnc : cncList)
+			if(cnc.getName().equals(name))
+				return cnc;
+		return null;
+	}
+	
 	/**
 	 * Check a ArrayList for the name of a Concept. Increments count if it is already there and adds id to id list
 	 * @param cList	ArrayList to check against
@@ -63,6 +70,13 @@ public class Concept extends Node{
 		}
 		
 		return false;
+	}
+	
+	public static Concept getLink(ArrayList<Concept> links, String id) {
+		for(Concept link : links)
+			if(link.getId().equals(id))
+				return link;
+		return null;
 	}
 
 	/**

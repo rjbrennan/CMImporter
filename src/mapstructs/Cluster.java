@@ -32,12 +32,26 @@ public class Cluster extends Node {
 		this.internalConnections = new ArrayList<Connection>();
 		this.edgeCount = 0;
 	}
-
+	
+	public static Cluster get(ArrayList<Cluster> cluList, String name) {
+			for(Cluster clu : cluList)
+				if(clu.getName().equals(name))
+					return clu;
+			return null;
+	}
+	
 	/**
 	 * @return	ArrayList of Concepts in this Cluster
 	 */
 	public ArrayList<Concept> getConcepts() {
 		return concepts;
+	}
+	
+	public String[] getConceptNames() {
+		String[] names = new String[concepts.size()];
+		for(int i = 0; i<concepts.size(); i++)
+			names[i] = concepts.get(i).getName();
+		return names;
 	}
 	
 	/**
@@ -81,6 +95,12 @@ public class Cluster extends Node {
 		concepts.add(c);
 		c.setCluster(this);
 		this.count += c.getCount();
+	}
+	
+	public void removeConcept(Concept c) {
+		concepts.remove(c);
+		c.setCluster(null);
+		this.count -= c.getCount();
 	}
 	
 	/**
