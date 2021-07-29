@@ -2,7 +2,7 @@ package mapstructs;
 import java.util.ArrayList;
 
 /**
- * 
+ * A connection object connects two concepts
  * @author Riordan Brennan
  *
  */
@@ -13,7 +13,7 @@ public class Connection {
 	private int count;
 
 	/**
-	 * Creates a Connection object from two Concept objects and an id
+	 * Creates a connection from two concepts and an id
 	 * @param from	Left Concept object
 	 * @param to	Right Concept object
 	 * @param id	String of unique id for Connection
@@ -27,12 +27,12 @@ public class Connection {
 	}
 	
 	/**
-	 * Checks if this Connection is already in the Connection ArrayList.
-	 * Increments count by if it does
-	 * @param cList	ArrayList of Connection objects to check against
-	 * @param from	Left Concept Object (orientation doesn't matter)
-	 * @param to	Right Concept Object (orientation doesn't matter)
-	 * @return
+	 * Checks if this connection is already in a connection ArrayList.
+	 * Increments count by 1 if it does
+	 * @param cList	ArrayList of connection objects to check against
+	 * @param from	left concept (orientation doesn't matter)
+	 * @param to	right concept (orientation doesn't matter)
+	 * @return	true if the connection is in the list, false otherwise
 	 */
 	public static boolean includes(ArrayList<Connection> cList, Concept from, Concept to) {
 		
@@ -48,14 +48,14 @@ public class Connection {
 	}
 
 	/**
-	 * @return Left Concept object
+	 * @return Left concept
 	 */
 	public Concept getFrom() {
 		return from;
 	}
 
 	/**
-	 * @return Right Connection object
+	 * @return Right concept
 	 */
 	public Concept getTo() {
 		return to;
@@ -66,14 +66,14 @@ public class Connection {
 	}
 
 	/**
-	 * @return	Connection object's unique id String
+	 * @return	Connection object's unique id
 	 */
 	public String getId() {
 		return id;
 	}
 
 	/**
-	 * @return	count of Connection object
+	 * @return	count
 	 */
 	public int getCount() {
 		return count;

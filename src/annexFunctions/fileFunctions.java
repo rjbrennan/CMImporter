@@ -6,12 +6,24 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Functions used in the collective concept map program that involve files
+ * @author Riordan Brennan
+ *
+ */
 public class fileFunctions {
 	
 	/* TODO write in metadata 
 	 * Title, fName, email, orgname
 	 * Repeat for contributor and rights holder
 	 * Created and modified timestamps*/
+	/**
+	 * Writes collective concept map to a .cxl file
+	 * @param template	.cxl file to base new file on
+	 * @param output	file to write to
+	 * @param guts		map specifics to place inside the template file
+	 * @throws IOException
+	 */
 	public static void writeCollectiveMap(File template, File output, String guts) throws IOException {
 		String contents = Files.readString(Path.of(template.toString()));
 		int cut = contents.indexOf("\n\t<style-sheet-list>");
@@ -23,8 +35,8 @@ public class fileFunctions {
 	
 	/**
 	 * Strips .cxl string down to just the list of concepts
-	 * @param cxl	String containing the contents of a .cxl file
-	 * @return	String of .cxl list of concepts
+	 * @param cxl	contents of a .cxl file
+	 * @return	list of concepts in .cxl format
 	 */
 	public static String cncStrip(String cxl) {
 		
@@ -38,8 +50,8 @@ public class fileFunctions {
 	
 	/**
 	 * Strips .cxl string down to just the list of connections
-	 * @param cxl	String containing the contents of a .cxl file
-	 * @return	String of .cxl list of connections
+	 * @param cxl	contents of a .cxl file
+	 * @return	list of connections in .cxl format
 	 */
 	public static String cnnStrip(String cxl) {
 		
@@ -53,6 +65,11 @@ public class fileFunctions {
 		return connections.trim();
 	}
 
+	/**
+	 * Strips .cxl string down to just the list of linking phrases
+	 * @param cxl	contents of a .cxl file
+	 * @return	list of linking phrases in .cxl format
+	 */
 	public static String linkStrip(String cxl) {
 		int linkStart = cxl.indexOf("<linking-phrase-list>");
 		if(linkStart==-1)

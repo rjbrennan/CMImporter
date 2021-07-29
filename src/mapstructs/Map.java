@@ -13,7 +13,7 @@ import annexFunctions.fileFunctions;
 import annexFunctions.stringFunctions;
 
 /**
- * 
+ * Map object that combines concepts, connections, links, clusters, and cluster connections
  * @author Riordan Brennan
  *
  */
@@ -35,11 +35,14 @@ public class Map {
 
 	Concept topicCnc;
 	
-	
 	/**
-	 * 	Constructs a Map object given you already have all the elements built. 
-	 * 	Almost never useful
-	 */
+	  * Constructs a Map object given you already have all the elements built. 
+	  * Almost never useful
+	  * @param clusters
+	  * @param clConnections
+	  * @param concepts
+	  * @param connections
+	  */
 	public Map(ArrayList<Cluster> clusters, 
 			   ArrayList<ClusterConnection> clConnections, 
 			   ArrayList<Concept> concepts,
@@ -69,6 +72,8 @@ public class Map {
 		
 		String[] contents = directoryPath.list();
 		
+		//Goes through each file in the folder, checks if it is a .cxl file
+		//If so, strips and reads in concepts, links, and connections
 		for(String file : contents) {
 			System.out.println(file);
 			if(file.endsWith(".cxl")) {
@@ -84,38 +89,41 @@ public class Map {
 				this.cnnReader(cnnString);
 			}
 		}
-		System.out.println(concepts);
 	}
 		
 	/**
-	 * Execute the collective concept map process
-	 * @param output	File to place the finished .cxl file
-	 * @param pGamma	Inflation value for Markov Clustering
-	 * @throws IOException
+	 * Builds the clusters for the map, lets user choose between multiple clustering algorithms
 	 */
 	public void buildClusters() {
 		
 		String[] choices = {"Markov Clustering", "Closest Cluster"};
 		String algorithm = (String) JOptionPane.showInputDialog(null, "Choose an algorithm", 
-													   "Line 2?", JOptionPane.QUESTION_MESSAGE, null,
+													   "Clustering", JOptionPane.QUESTION_MESSAGE, null,
 													   choices, choices[0]);
 		
 		//Prompts user to enter the topic of the maps, tests whether topic is in the map
-		String topic = JOptionPane.showInputDialog("Enter the topic");
+		String topic = JOptionPane.showInputDialog(null, "Enter your topic", "Clustering", JOptionPane.QUESTION_MESSAGE);
 		while(!inMap(topic)) {	
 			topic = JOptionPane.showInputDialog("That topic did not match any concepts, please try again");
 		}
 		
+		//Runs MCL
 		if(algorithm.equals("Markov Clustering")) {
 			MCL mcl = new MCL(this);
 			mcl.execute();
 		}
+		
+		//Runs CCL
 		else if(algorithm.equals("Closest Cluster")) {
 			CCL ccl = new CCL(this);
 			ccl.execute();
 		}
 	}
 	
+	/**
+	 * Builds the cluster connections, sets cluster edge counts
+	 * and determines if a cluster is an 'extra cluster'
+	 */
 	public void buildClConnections() {
 		this.clcBuilder();
 		
@@ -124,10 +132,19 @@ public class Map {
 				clu.setExtra(true);
 	}
 	
+	/**
+	 * Writes the output file
+	 * @param output	file to write to
+	 * @throws IOException	if the pathname doesn't exist or isn't a .cxl file
+	 */
 	public void export(File output) throws IOException {
+		
+		if(!output.getName().endsWith(".cxl"))
+			throw new IOException("File isn't a cxl file");
 		
 		int numClu = this.positionCalculator();
 		
+		//Combines all the parts to add to the template
 		String guts = this.mapCxl()+"\n"+
 					  this.cluCxl()+"\n"+this.clcCxl()+"\n"+
 					  this.cluCxlStyle(numClu)+"\n"+this.clcCxlStyle();
@@ -152,8 +169,10 @@ public class Map {
 	}
 	
 	/**
-	 * Turns string of .cxl concepts into Concept objects and adds them to concepts
-	 * @param concepts	string of .cxl concepts, created by cncStrip()
+	 * Turns string of .cxl concepts into concept objects and adds them to concepts
+	 * <p>
+	 * Splits list terms with {@link stringFunctions#splitCnc}
+	 * @param concepts	string of .cxl concepts, created by {@link fileFunctions#cncStrip}
 	 */
 	private void cncReader(String concepts) {
 		String id; String name; String[] names;
@@ -168,6 +187,7 @@ public class Map {
 			names = stringFunctions.splitCnc(name);
 			//FIXME ignore plurals
 			//FIXME spelling mistakes
+			//If splitCnc gave back multiple strings we have to make each one a concept
 			for(String n : names)
 			{
 				if(!Concept.includes(this.concepts, n, id))
@@ -178,8 +198,12 @@ public class Map {
 	
 	/**
 	 * Turns string of .cxl connections into Connection objects and adds them to connections.
-	 * Must have already ran cncReader() or have a filled concepts object to work
-	 * @param connections	string of .cxl connections, created by cnnStrip()
+	 * Must have already ran {@link Map#cncReader cncReader} or have a filled concepts object to work
+	 * <p>
+	 * becomes multiple connections if the to or from were split in {@link Map#cncReader cncReader}
+	 * <p>
+	 * If to or from is a link, bypass it straight to the concept
+	 * @param connections	string of .cxl connections, created by {@link fileFunctions#cnnStrip}
 	 */
 	//FIXME Only allow one connection between two terms per map
 	private void cnnReader(String connections) {
@@ -203,13 +227,13 @@ public class Map {
 				toCnc = new Concept[1];
 				toCnc[0] = Concept.getLink(this.links, to);
 			}
-			System.out.println(fromCnc[0]+", "+toCnc[0]);
 			for(Concept fcnc : fromCnc)
 				for(Concept tcnc : toCnc)
 					if(!Connection.includes(this.connections, fcnc, tcnc))
 						this.connections.add(new Connection(fcnc, tcnc, id));
 		}
 		
+		//Bypassing links, combines connections on either side of link
 		Connection tempCnn;
 		for(int i = this.connections.size()-1; i>=0; i--) {
 			tempCnn = this.connections.get(i);
@@ -226,6 +250,10 @@ public class Map {
 		
 	}
 	
+	/**
+	 * Turns string of .cxl links to concept objects and adds them to the links list
+	 * @param links	string of .cxl links, created by {@link fileFunctions#linkStrip}
+	 */
 	private void linkReader(String links) {
 		String name; String id; 
 		
@@ -238,9 +266,9 @@ public class Map {
 	}
 	
 	/**
-	 * Makes a grid of integers, each box records the count of connections 
+	 * Makes a grid of doubles, each box records the count of connections 
 	 * between the x and y elements
-	 * @return	2-dimensional integer array
+	 * @return	2-dimensional double array
 	 */
 	double[][] cncGrid() {
 		double[][] grid = new double[concepts.size()][concepts.size()];
@@ -265,7 +293,7 @@ public class Map {
 	/**
 	 * Makes a grid of integers, each box records the connections between
 	 * a concept and a cluster
-	 * @param cncGrid	2-dim int array made by cncGrid()
+	 * @param cncGrid	2-dim double array made by {@link Map#cncGrid cncGrid}
 	 * @return	2-dimensional integer array
 	 */
 	int[][] cluGrid(double[][] cncGrid) {
@@ -286,12 +314,12 @@ public class Map {
 	}
 	
 	/**
-	 * Updates the cluster grid made by cluGrid()
-	 * @param cluGrid	2-dim int array made by cluGrid()
-	 * @param cncGrid	2-dim int array made by cncGrid()
+	 * Updates the cluster grid made by {@link Map#cluGrid cluGrid}
+	 * @param cluGrid	2-dim int array made by {@link Map#cluGrid cluGrid}
+	 * @param cncGrid	2-dim double array made by {@link Map#cncGrid cncGrid}
 	 * @param cnc		Index of concept to update the grid off of
 	 * @param clu		Index of cluster to update the grid for
-	 * @return			The transformed 2-dim int array, cluGrid
+	 * @return			The transformed 2-dim int array
 	 */
 	int[][] updateCluGrid(int[][] cluGrid, double[][] cncGrid, int cnc, int clu) {
 		
@@ -304,7 +332,7 @@ public class Map {
 	
 	/**
 	 * Finds the most connected concept not yet assigned to a cluster
-	 * @param cncGrid	2-dim int array made by cncGrid()
+	 * @param cncGrid	2-dim double array made by {@link Map#cncGrid cncGrid}
 	 * @return			Index of the most connected concept
 	 */
 	int mostConnected(double[][] cncGrid) {
@@ -352,8 +380,8 @@ public class Map {
 	}
 	
 	/**
-	 * Fills clConnections and each Clusters' internalConnections.
-	 * Must have filled clusters object to work
+	 * Fills clConnections and each clusters' internalConnections.
+	 * Must have ran {@link Map#buildClusters buildClusters} to work
 	 */
 	private void clcBuilder() {
 		Cluster a; Cluster b;
@@ -372,6 +400,11 @@ public class Map {
 		}
 	}
 	
+	/**
+	 * Finds the index of the last extra cluster before the index entered
+	 * @param i	index to look before
+	 * @return	index of extra cluster, if there were none, returns the parameter index
+	 */
 	private Cluster lastExtra(int i) {
 		int j = i;
 		while(--j>=0)
@@ -382,6 +415,7 @@ public class Map {
 	
 	/**
 	 * Calculates the radius of the map for the .cxl file
+	 * @return the number of important clusters
 	 */
 	private int positionCalculator() {
 		int longest = 0;
@@ -395,8 +429,6 @@ public class Map {
 		
 		longestPix = Map.MARGIN*2 + Map.CHAR_WIDTH*longest;
 		longestWidth = longest;
-		
-		System.out.println(longestPix + ", "+longestWidth);
 		
 		radius = ((longestPix)*numClu)/4;
 		

@@ -1,26 +1,44 @@
 package annexFunctions;
 
+import java.util.ArrayList;
+
 import mapstructs.Concept;
 
+/**
+ * Functions used in the collective concept map program that involve arrays
+ * @author Riordan Brennan
+ *
+ */
 public class arrayFunctions {
 	
 	/**
-	 * @param array	int array to find the max of
-	 * @return	The index of the int array with the highest value 
+	 * Finds the index of the highest number in an int array. 
+	 * If multiple indices have the same value and are the highest number in the array, choose a random one
+	 * @param array	int array
+	 * @return	The index of the highest number
 	 */
 	public static int max(int[] array) {
-		int max = 0;
-		for(int i = 0; i<array.length; i++)
-			if(array[i] > array[max])
-				max = i;
-		return max;
+		ArrayList<Integer> max = new ArrayList<Integer>();
+		max.add(0);
+		for(int i = 1; i<array.length; i++) {
+			if(array[i] > array[max.get(0)]) {
+				max.clear();
+				max.add(i);
+			}
+			else if(array[i] == array[max.get(0)]) {
+				max.add(i);
+			}
+		}
+		int r = (int) Math.floor(Math.random()*max.size());
+		System.out.println(r);
+		return max.get(r);
 	}
 	
 	/**
-	 * Fills an int array with an int
-	 * @param array	Array to fill
-	 * @param fill	Int to fill array with
-	 * @return	The filled array
+	 * Fills an int array with a specified value
+	 * @param array	array
+	 * @param fill	specified value
+	 * @return	filled array
 	 */
 	public static int[] fill(int[] array, int fill) {
 		for(int i = 0; i<array.length; i++)
@@ -29,9 +47,9 @@ public class arrayFunctions {
 	}
 	
 	/**
-	 * Formats an int array to print
-	 * @param array	Array to format
-	 * @return	Formated string to print
+	 * Formats an int array in a printable format
+	 * @param array array
+	 * @return	Formated string
 	 */
 	public static String print(int[] array) {
 		String combine = "{";
@@ -41,6 +59,11 @@ public class arrayFunctions {
 		return combine+"}";
 	}
 	
+	/**
+	 * Formats a double matrix in a printable format
+	 * @param matrix	matrix
+	 * @return	Formated string
+	 */
 	public static String print(double[][] matrix) {
 		String combine = "";
 		for(double[] row : matrix) {
@@ -53,8 +76,9 @@ public class arrayFunctions {
 	}
 	
 	/**
-	 * @param cncGrid	int array to sum
-	 * @return	The sum of the int array
+	 * Find the sum of a double array
+	 * @param cncGrid	double array
+	 * @return	sum
 	 */
 	public static int sum(double[] cncGrid) {
 		int sum = 0;
@@ -64,8 +88,9 @@ public class arrayFunctions {
 	}
 	
 	/**
-	 * @param m	Matrix
-	 * @return	Transposed matrix
+	 * Transposes a double matrix
+	 * @param m	matrix
+	 * @return	transposed matrix
 	 */
 	public static double[][] transposeMatrix(double [][] m) {
         double[][] temp = new double[m[0].length][m.length];
@@ -78,10 +103,10 @@ public class arrayFunctions {
 	/**
 	 * Adds an element to an array by moving everything to the right 
 	 * and removing the last element
-	 * @param array	Array to add the new element to
-	 * @param cnc	Concept to add
-	 * @param i		Index to place the new element in
-	 * @return		The transformed array
+	 * @param array	array
+	 * @param cnc	concept to add
+	 * @param i		index to place the new element in
+	 * @return		transformed array
 	 */
 	public static Concept[] move(Concept[] array, Concept cnc, int i) {
 		array[array.length-1] = null;

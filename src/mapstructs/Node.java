@@ -1,7 +1,7 @@
 package mapstructs;
 
 /**
- * 
+ * Superclass to concept and cluster classes
  * @author Riordan Brennan
  *
  */
@@ -12,8 +12,8 @@ public class Node {
 	int count;
 	
 	/**
-	 * @param name	Name of Node
-	 * @param id	Unique id of Node
+	 * @param name	name of node
+	 * @param id	unique id of node
 	 */
 	public Node(String name, String id) {
 		super();
@@ -23,29 +23,29 @@ public class Node {
 	}
 
 	/**
-	 * @return	Name of node
+	 * @return	name of node
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * Sets the name of the Node object
-	 * @param name	Name String to set to
+	 * sets the name of the node
+	 * @param name
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	/**
-	 * @return Unique id of Node
+	 * @return unique id
 	 */
 	public String getId() {
 		return id;
 	}
 
 	/**
-	 * @return Current count of Node
+	 * @return count
 	 */
 	public int getCount() {
 		return count;

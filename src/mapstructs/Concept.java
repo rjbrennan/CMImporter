@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * 
+ * A concept is a single node to be added to a cluster
  * @author Riordan Brennan
  *
  */
@@ -13,8 +13,8 @@ public class Concept extends Node{
 	
 	/**
 	 * Creates Concept object given name and unique id
-	 * @param name	Name of Concept
-	 * @param id	Unique id for Concept object
+	 * @param name	Name of concept
+	 * @param id	Unique id for concept object
 	 */
 	public Concept(String name, String id) {
 		super(name, id);
@@ -44,6 +44,12 @@ public class Concept extends Node{
 		return Arrays.copyOfRange(matches, 0, i+1);
 	}
 	
+	/**
+	 * Finds a concept from an ArrayList of concepts given a concept name
+	 * @param cncList	ArrayList of concepts
+	 * @param name		concept name
+	 * @return	first instance of a concept with the specified name
+	 */
 	public static Concept get(ArrayList<Concept> cncList, String name) {
 		for(Concept cnc : cncList)
 			if(cnc.getName().equals(name))
@@ -52,11 +58,11 @@ public class Concept extends Node{
 	}
 	
 	/**
-	 * Check a ArrayList for the name of a Concept. Increments count if it is already there and adds id to id list
+	 * Check a ArrayList for the name of a concept. Increments count if it is already there and adds id to id list
 	 * @param cList	ArrayList to check against
 	 * @param name	Name to check for, ignores case
-	 * @param id	id to add to id list in case Concept already exists
-	 * @return	True if Concept already exists, false otherwise
+	 * @param id	id to add to id list in case concept already exists
+	 * @return	True if concept already exists, false otherwise
 	 */
 	public static boolean includes(ArrayList<Concept> cncList, String name, String id) {
 		for(Concept cnc : cncList) {
@@ -72,6 +78,12 @@ public class Concept extends Node{
 		return false;
 	}
 	
+	/**
+	 * Finds a link from an ArrayList of link concepts given an id
+	 * @param links		ArrayList of link concepts
+	 * @param id		link id
+	 * @return	first instance of a link concept with the specified name
+	 */
 	public static Concept getLink(ArrayList<Concept> links, String id) {
 		for(Concept link : links)
 			if(link.getId().equals(id))
@@ -80,7 +92,7 @@ public class Concept extends Node{
 	}
 
 	/**
-	 * @return	List of ids that had this same Concept name
+	 * @return	List of ids that had this same concept name
 	 */
 	public ArrayList<String> getIds() {
 		return ids;
@@ -106,15 +118,15 @@ public class Concept extends Node{
 	}
 	
 	/**
-	 * @return Cluster this Concept is a part of
+	 * @return cluster this concept is a part of
 	 */
 	public Cluster getCluster() {
 		return cluster;
 	}
 
 	/**
-	 * Set the Cluster this Concept is a part of
-	 * @param cluster	Cluster to set
+	 * Set the cluster this concept is a part of
+	 * @param cluster	cluster to set
 	 */
 	public void setCluster(Cluster cluster) {
 		this.cluster = cluster;

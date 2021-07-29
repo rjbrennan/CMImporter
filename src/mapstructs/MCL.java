@@ -15,11 +15,21 @@ import annexFunctions.arrayFunctions;
 import net.sf.javaml.clustering.mcl.MarkovClustering;
 import net.sf.javaml.clustering.mcl.SparseMatrix;
 
+/**
+ * Markov Clustering method, adapts the {@link MarkovClustering} 
+ * to be used for collective concept map clustering.
+ * @author Riordan Brennan
+ *
+ */
 public class MCL {
 	
 	private Map map;
 	private double pGamma;
 	
+	/**
+	 * Creates MCL object and asks user for a pGamma input, framed as "how many cluster would you like"
+	 * @param map	concept map to run MCL on
+	 */
 	public MCL(Map map) {
 		this.map = map;
 		
@@ -27,8 +37,8 @@ public class MCL {
 		while(pGamma<=0) {
 			JFrame frame = new JFrame();
 			JSlider slider = createSlider(10, 20);
-			JPanel sliderPanel = createSliderPanel(slider, "myMessage");
-			String title = "myTitle";
+			JPanel sliderPanel = createSliderPanel(slider, "How many clusters would you like?");
+			String title = "Clustering";
 			int dialogResponse = JOptionPane.showOptionDialog
 		            (frame,                  // I'm within a JFrame here
 		             sliderPanel,
@@ -48,31 +58,43 @@ public class MCL {
 			
 		}
 		
+		//Slider only works in integers, so I do 10-20 and reduce to 1.0-2.0
 		pGamma = pGamma/10;
 	}
 	
 	public void execute() {
 		double[][] cncGrid = map.cncGrid();
 		
+		//Creates MarkovCLustering object
 		MarkovClustering mcl = new MarkovClustering();
+		//Creates SparseMatrix from the cncGrid, which I want to run MCL on
 		SparseMatrix matrix = new SparseMatrix(cncGrid);
+		//Runs MCL, mins set to 0.01, loopGain set to 1 (pretty sure this is normal), and pGamma to user input
 		matrix = mcl.run(matrix, 0.01, pGamma, 1, 0.01);
 		
+		//Converts output matrix to double matrix
 		cncGrid = matrix.getDense();
 		
+		//Matrix is wrong way for what I need, so I transpose it
 		cncGrid = arrayFunctions.transposeMatrix(cncGrid);
 		
-		//System.out.println(arrayFunctions.print(cncGrid));
-		
 		Cluster temp = null;
+		
+		//Creates clusters if there are values above 0 in its row
+		//Adds the column of every value above 0 to that cluster
 		for(int i = 0; i<cncGrid.length; i++)
 		{
 			temp = null;
 			for(int j = 0; j<cncGrid[i].length; j++)
 			{
+				//If a concept already has a cluster keep going
 				if(map.concepts.get(j).getCluster() != null)
 					continue;
+				
+				//If value is above threshold, add to row's cluster
 				if(cncGrid[i][j] > 0.01) {
+					
+					//If the row isn't a cluster yet, make it one and add itself
 					if(temp == null) {
 						temp = new Cluster(map.concepts.get(i));
 						map.clusters.add(temp);

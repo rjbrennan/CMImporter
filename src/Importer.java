@@ -12,7 +12,8 @@ import mapstructs.Concept;
 import mapstructs.Map;
 
 /**
- * Front end of program and calls to back end
+ * Front end of Collective Concept Map program
+ * 
  * @author rjbrennan
  *
  */
@@ -32,18 +33,21 @@ public class Importer {
 				folder.setDialogTitle("Select a folder of concept maps");
 				folder.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				folder.setAcceptAllFileFilterUsed(false);
-				System.out.println("Trying to keep the code running");
 				folder.showOpenDialog(null);
 				input = folder.getSelectedFile();
 			}
 		});
 		
-		
 		//Creates Map object
 		Map map = new Map(input);
 		
+		//Runs the cluster building function
 		map.buildClusters();
 		
+		//Temporary rearrange UI solution, uses drop downs to either move an element or rename a cluster
+		//Move Element: Select a cluster --> select a concept in that cluster to remove --> Select a cluster to place the selected concept in
+		//Rename Cluster: Select a cluster --. Select an element in that cluster to use as the cluster name
+		//TODO	implement drag-and-drop GUI to replace this
 		String rearrangeOption = "";
 		Cluster clu; Concept cnc;
 		String option;
@@ -51,23 +55,23 @@ public class Importer {
 		String[] choices = {"Move Element", "Rename Cluster", "Done"};
 		while(!rearrangeOption.equals("Done")) {
 			rearrangeOption = (String) JOptionPane.showInputDialog(null, "What do you want to do",
-																	"Line 2", JOptionPane.QUESTION_MESSAGE,
+																	"Adjusting Collective Concept Map", JOptionPane.QUESTION_MESSAGE,
 																	null, choices, choices[0]);
 			if(rearrangeOption.equals("Move Element")) {
 				cluNames = map.getClusterNames(false);
 				
 				option = (String) JOptionPane.showInputDialog(null, "Choose a cluster to remove a concept from",
-															  "Line 2", JOptionPane.QUESTION_MESSAGE,
+															  "Move Element", JOptionPane.QUESTION_MESSAGE,
 															  null, cluNames, cluNames[0]);
 				clu = Cluster.get(map.getClusters(), option);
 				cncNames = clu.getConceptNames();
 				option = (String) JOptionPane.showInputDialog(null, "Choose a concept to move",
-															  "Line 2", JOptionPane.QUESTION_MESSAGE,
+															  "Move Element", JOptionPane.QUESTION_MESSAGE,
 															  null, cncNames, cncNames[0]);
 				cnc = Concept.get(clu.getConcepts(), option);
 				clu.removeConcept(cnc);
 				option = (String) JOptionPane.showInputDialog(null, "Choose a cluster to move the concept to",
-															  "Line 2", JOptionPane.QUESTION_MESSAGE,
+															  "Move Element", JOptionPane.QUESTION_MESSAGE,
 															  null, cluNames, cluNames[0]);
 				clu = Cluster.get(map.getClusters(), option);
 				clu.addConcept(cnc);
@@ -76,17 +80,19 @@ public class Importer {
 				cluNames = map.getClusterNames(false);
 				
 				option = (String) JOptionPane.showInputDialog(null, "Choose a cluster to rename",
-															  "Line 2", JOptionPane.QUESTION_MESSAGE,
+															  "Rename Cluster", JOptionPane.QUESTION_MESSAGE,
 															  null, cluNames, cluNames[0]);
 				clu = Cluster.get(map.getClusters(), option);
 				cncNames = clu.getConceptNames();
 				option = (String) JOptionPane.showInputDialog(null, "Choose a new name",
-															  "Line 2", JOptionPane.QUESTION_MESSAGE,
+															  "Rename Cluster", JOptionPane.QUESTION_MESSAGE,
 															  null, cncNames, cncNames[0]);
 				clu.setName(option);
 			}
 		}
 		
+		//Runs the cluster connection building function
+		//This must occur after rearranging, cluster connections can't fix themselves!
 		map.buildClConnections();
 		
 		// FIXME if you write the name of another file, it just does filename..cxl
@@ -103,7 +109,7 @@ public class Importer {
             }
         });
 
-		//Execute map clustering and file building
+		//Runs file building and exporting
 		map.export(output);
 
 	}

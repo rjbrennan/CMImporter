@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import annexFunctions.stringFunctions;
 
 /**
- * 
+ * A cluster is a group of concepts
  * @author Riordan Brennan
  *
  */
@@ -22,7 +22,7 @@ public class Cluster extends Node {
 
 	/**
 	 * Create new cluster object
-	 * @param concept	The initial concept to be added. 
+	 * @param concept	The initial concept to be added.
 	 * The cluster will be named after it.
 	 */
 	public Cluster(Concept concept) {
@@ -33,6 +33,12 @@ public class Cluster extends Node {
 		this.edgeCount = 0;
 	}
 	
+	/**
+	 * Finds a cluster from an ArrayList of clusters given a cluster name
+	 * @param cluList	ArrayList of clusters
+	 * @param name		cluster name
+	 * @return	first instance of a cluster with the specified name
+	 */
 	public static Cluster get(ArrayList<Cluster> cluList, String name) {
 			for(Cluster clu : cluList)
 				if(clu.getName().equals(name))
@@ -41,12 +47,15 @@ public class Cluster extends Node {
 	}
 	
 	/**
-	 * @return	ArrayList of Concepts in this Cluster
+	 * @return	ArrayList of concepts in this cluster
 	 */
 	public ArrayList<Concept> getConcepts() {
 		return concepts;
 	}
 	
+	/**
+	 * @return String array of the names of the concepts in this cluster
+	 */
 	public String[] getConceptNames() {
 		String[] names = new String[concepts.size()];
 		for(int i = 0; i<concepts.size(); i++)
@@ -55,7 +64,7 @@ public class Cluster extends Node {
 	}
 	
 	/**
-	 * Refreshes the count of this Cluster 
+	 * Refreshes the count of this cluster, by adding all the counts of concepts in the cluster
 	 */
 	public void setCount() {
 		this.count = 0;
@@ -72,24 +81,31 @@ public class Cluster extends Node {
 	}
 	
 	/**
-	 * @return the edgeCount variable
+	 * @return edgeCount
 	 */
 	public int getEdgeCount() {
 		return edgeCount;
 	}
 	
+	/**
+	 * Set the extra variable, determines if a cluster is seen as an initial cluster or an extra cluster
+	 * @param b	boolean
+	 */
 	public void setExtra(boolean b) {
 		this.extra = b;
 	}
 	
+	/**
+	 * @return extra variable
+	 */
 	public boolean getExtra() {
 		return extra;
 	}
 	
 	/**
-	 * Adds a Concept object to the Cluster and updates the Concept object's cluster parameter.
+	 * Adds a concept to the cluster and updates the concept's cluster parameter.
 	 * Also updates this Cluster's count
-	 * @param c	Concept to be added
+	 * @param c	concept to be added
 	 */
 	public void addConcept(Concept c) {
 		concepts.add(c);
@@ -97,6 +113,10 @@ public class Cluster extends Node {
 		this.count += c.getCount();
 	}
 	
+	/**
+	 * removes a concept from this cluster and updates the concept's cluster parameter, updates count
+	 * @param c	concept to be removed
+	 */
 	public void removeConcept(Concept c) {
 		concepts.remove(c);
 		c.setCluster(null);
@@ -104,9 +124,9 @@ public class Cluster extends Node {
 	}
 	
 	/**
-	 * Adds a connection between to Concept objects in this cluster
+	 * Adds a connection between two concepts in this cluster
 	 * to the internalConnections ArrayList
-	 * @param co	Connection to be added
+	 * @param co	connection to be added
 	 */
 	public void addInternalConnection(Connection co) {
 		this.internalConnections.add(co);
@@ -121,6 +141,10 @@ public class Cluster extends Node {
 		return combined;
 	}
 	
+	/**
+	 * Variant of the toString method that formats the cluster for the .cxl short-comment section
+	 * @return	formated cluster string
+	 */
 	public String toStringCxl() {
 		String combined = "Topics:";
 		for(Concept cnc : concepts)
@@ -142,7 +166,8 @@ public class Cluster extends Node {
 	 * Formats the cluster style .cxl line
 	 * @param radius	the radius, in pixels, of the circle concept map
 	 * @param i			the clusters ordinal value in the map
-	 * @param n			the total number of clusters in the map		
+	 * @param n			the total number of clusters in the map	
+	 * @return	the formated .cxl line	
 	 */
 	public String toCxlStyle(int radius, int i, int n) {
 		int x = (int) (radius * Math.cos(((2*Math.PI*i)/n)+(3*Math.PI/2))+(1.5*radius));
@@ -153,6 +178,13 @@ public class Cluster extends Node {
 				" border-shape=\"oval\" shadow-color=\"none\"/>";
 	}
 	
+	/**
+	 * Formats the cluster style .cxl line for extra clusters
+	 * @param map		map object that this cluster is a part of
+	 * @param yLast		the y-value, in pixels, of the last extra cluster placed
+	 * @param hLast		the height of the box, in lines, of the last extra cluster placed
+	 * @return	the formated .cxl line
+	 */
 	public String toCxlStyleExtra(Map map, int yLast, int hLast) {
 		int x = (int) (map.radius*2.5 + map.longestPix*1.5);
 		this.y = (int) (yLast+

@@ -3,7 +3,7 @@ package mapstructs;
 import java.util.ArrayList;
 
 /**
- * 
+ * A cluster connection is a connection between two clusters
  * @author Riordan Brennan
  *
  */
@@ -18,9 +18,9 @@ public class ClusterConnection {
 	private int count;
 	
 	/**
-	 * Creates a ClusterConnection with a connection between two clusters and an id
-	 * @param co	Connection object between two Concept objects in separate Cluster objects
-	 * @param id	Unique id for this ClusterConnection
+	 * Creates a cluster connection with a connection between two clusters and an id
+	 * @param co	Connection object between two concepts in separate clusters
+	 * @param id	Unique id for this cluster connection
 	 */
 	public ClusterConnection(Connection co, String id) {
 		super();
@@ -31,11 +31,11 @@ public class ClusterConnection {
 	}
 	
 	/**
-	 * Checks if a ClusterConnection already exists in a ArrayList,
-	 * if it does, add the count of the tested connection to the existing ClusterConnection
-	 * @param clList	ClusterConnection ArrayList to be checked against
-	 * @param co	Connection object to be tested
-	 * @return	true if ClusterConnection already exists, false otherwise
+	 * Checks if a cluster connection already exists in a ArrayList,
+	 * if it does, add the count of the tested connection to the existing cluster connection
+	 * @param clList	cluster connection ArrayList to be checked against
+	 * @param co	connection object to be tested
+	 * @return	true if cluster connection already exists, false otherwise
 	 */
 	public static boolean includes(ArrayList<ClusterConnection> clList, Connection co) {
 		for(ClusterConnection clc : clList) {
@@ -50,35 +50,35 @@ public class ClusterConnection {
 	}
 
 	/**
-	 * @return	Cluster on the left side of the ClusterConnection
+	 * @return	cluster on the left side of the cluster connection
 	 */
 	public Cluster getFrom() {
 		return from;
 	}
 	
 	/**
-	 * @return	Cluster on the right side of the ClusterConnection
+	 * @return	cluster on the right side of the cluster connection
 	 */
 	public Cluster getTo() {
 		return to;
 	}
 
 	/**
-	 * @return	id of ClusterConnection
+	 * @return	id of cluster connection
 	 */
 	public String getId() {
 		return id;
 	}
 
 	/**
-	 * @return	Get the current count of connections between the two Clusters
+	 * @return	Get the current count of connections between the two clusters
 	 */
 	public int getCount() {
 		return count;
 	}
 
 	/**
-	 * Increments the count of connections between the two Clusters
+	 * Increments the count of connections between the two clusters
 	 * @param count	int of amount to increment by
 	 */
 	public void incrementCount(int count) {
